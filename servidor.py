@@ -21,11 +21,11 @@ def initServer(clientes):
     #infinite loop - do not reset for every requests
     while True:
         con, cliente = tcp.accept()
-        #print("con:",con)
+        #print(con.getpeername()) #pegar as informações do cliente        
         ip, port = str(cliente[0]), str(cliente[1])
         print ("O cliente {} se conectou ao servidor.".format(port))
-        clientes.append(con)
-        Thread(target=clientThread, args=(con,port)).start()   
+
+        Thread(target=clientThread, args=(con,port, clientes)).start()   
     tcp.close()  
 
 
@@ -38,24 +38,27 @@ def serverThread():
             #ou sys.exit()      
 
 
-def clientThread(con,port):
+def clientThread(con,port, clientes):
     while True:
         msg = con.recv(1024)
         
         if not msg: break
         msg = msg.decode("utf-8") 
         print("Cliente {} disse: {}".format(port, msg))
-        
+
+        clientes[con] = msg #dicionario que mapeia socket - nome
+        #print(clientes)      
+
         reply_msg = "Recebi tua mensagem '" + msg +"'"
         con.send(bytes(reply_msg, 'iso_8859_1'))
-        #print (msg)    
+           
         
     print("Cliente", port,"solicitou o fechamento da conexão...")
     con.close()
     print ("Cliente {} deixou o servidor.".format(port))
        
 
-clientes = []
+clientes = {}
 initServer(clientes)
 
 
