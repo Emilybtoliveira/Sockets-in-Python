@@ -10,10 +10,13 @@ print ('Para sair pressione Enter')
 
 msg = ''
 
-while (msg != b''):       
+while (msg != b''):        
     msg = bytes(input(), 'iso_8859_1')
-    print(msg)
-    tcp.sendall(msg)    
+    tcp.sendall(msg) 
+    
+    msg_servidor = tcp.recv(1024)
+    print("Servidor disse: ", msg_servidor.decode("utf-8"))
+       
 
 print("Fechando conexão...")
 tcp.close()
