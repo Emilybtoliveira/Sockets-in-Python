@@ -10,7 +10,7 @@ def receiveMessages():
 
 def sendMessage():
     print ('Para sair pressione Enter')
-
+    
     msg = ''
 
     while (msg != b''):        
@@ -27,7 +27,10 @@ PORT = 5000            # Porta que o Servidor esta
 
 tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 dest = (HOST, PORT)
-tcp.connect(dest)
+try:
+    tcp.connect(dest)
+except ConnectionRefusedError:
+    print("servidor off")
 
 Thread(target=receiveMessages, args=()).start() 
 
