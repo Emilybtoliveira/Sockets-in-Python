@@ -4,9 +4,10 @@ import sys,os
 
 #MULTI-THREAD
 
-listaUsuarios = ['felipe','emily']
+listaUsuarios = ['felipe','emily','taigo']
 clientes = {}
 clientesOnline = {}
+
 
 def initServer(clientes):
     host = "localhost"
@@ -45,51 +46,61 @@ def serverThread():
 
 def replyMsg(msg,con):
     msg = str(msg)
-    return con.send(bytes(msg, 'iso_8859_1'))
+    return con.send(bytes(msg, 'utf-8'))
 
 def clientThread(con,port, clientes):
     clienteIn = False
     inChat = False
+    conversaAtual = ""
+    usuarioNome = ""
     
     while True:
         msg = con.recv(1024)
         if msg == 'sair': break
         msg = msg.decode("utf-8")
-        nomeC = "" 
+        
         if(clienteIn==False):
             if(msg in listaUsuarios):
                 replyMsg("Voce entrou no servidor, bem vindo!",con)
                 print("Cliente %s entrou no servidor" % msg)
                 clienteIn = True
-                nomeC = msg
+        
+                usuarioNome = msg
                 clientesOnline[msg] = port
                 
             else:
                 replyMsg("Voce nao esta cadastrado!",con)
         else:
             if(inChat):
+                if(msg=='quit'):
+                    inChat=False
+                    conversaAtual = ""
+                    replyMsg("Voce saiu do chat",con)
+                else:
                 # enviar msg aqui para a porta do receptor
-                print("esta em chat")
-                pass
+                    msgEnviar = usuarioNome+": "+msg
+                    replyMsg(msgEnviar,clientes[conversaAtual])
+                    print("conversaAtual: ",conversaAtual)
             else:
-                if(msg=="listar"):
+                if(msg=="conversar"):
+                    replyMsg("Escolha com quem conversar:",con)
                     replyMsg(list(clientesOnline.keys()),con)
-                    replyMsg(clientes['felipe'],con)
                     print(clientesOnline)
-                    print(type(clientes['felipe']))
-                # elif(msg in clientesOnline and inChat==False):
-                #     replyMsg("voces está num chat",con)
-                #     portaConversa = clientesOnline[msg]
-                #     inChat = True
-            
+
+                if(msg in list(clientesOnline.keys())):
+                    inChat = True
+                    replyMsg("Você está conversando.",con)
+                    conversaAtual = msg
+
 
 
             indice = (list(clientesOnline.values())).index(port)
             nomeCliente = list(clientesOnline.keys())[indice]
-            print("Cliente {} disse: {}".format(nomeCliente, msg))
+            if(inChat):
+                print("Cliente {} disse: {}".format(nomeCliente, msg))
 
 
-        clientes[nomeC] = con #dicionario que mapeia socket - nome
+        clientes[usuarioNome] = con #dicionario que mapeia socket - nome
         #print(clientes)      
 
         # reply_msg = "Recebi tua mensagem '" + msg +"'"
@@ -100,7 +111,8 @@ def clientThread(con,port, clientes):
     con.close()
     print ("Cliente {} deixou o servidor.".format(port))
        
-
+def getclientes():
+    return clientes
 
 initServer(clientes)
 

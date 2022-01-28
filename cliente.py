@@ -6,7 +6,7 @@ def receiveMessages():
         msg_servidor = tcp.recv(1024)
         if not msg_servidor: break
         msgDecodificada = msg_servidor.decode("utf-8")
-        print("Servidor disse: ", msgDecodificada)
+        print(msgDecodificada)
         if "socket" in msgDecodificada[0:10]:
             classe = eval(msgDecodificada)
             print(type(classe))
