@@ -5,7 +5,13 @@ def receiveMessages():
     while True:
         msg_servidor = tcp.recv(1024)
         if not msg_servidor: break
-        print("Servidor disse: ", msg_servidor.decode("utf-8"))
+        msgDecodificada = msg_servidor.decode("utf-8")
+        print("Servidor disse: ", msgDecodificada)
+        if "socket" in msgDecodificada[0:10]:
+            classe = eval(msgDecodificada)
+            print(type(classe))
+        # fazer aqui para ele retornar o socket 
+        
     tcp.close()
 
 def sendMessage():
@@ -35,3 +41,5 @@ except ConnectionRefusedError:
 Thread(target=receiveMessages, args=()).start() 
 
 sendMessage()
+
+# mudar a porta, mudar o tcp para o novo socket que vem do servidor

@@ -54,13 +54,14 @@ def clientThread(con,port, clientes):
     while True:
         msg = con.recv(1024)
         if msg == 'sair': break
-        msg = msg.decode("utf-8") 
+        msg = msg.decode("utf-8")
+        nomeC = "" 
         if(clienteIn==False):
             if(msg in listaUsuarios):
                 replyMsg("Voce entrou no servidor, bem vindo!",con)
                 print("Cliente %s entrou no servidor" % msg)
                 clienteIn = True
-                
+                nomeC = msg
                 clientesOnline[msg] = port
                 
             else:
@@ -73,7 +74,9 @@ def clientThread(con,port, clientes):
             else:
                 if(msg=="listar"):
                     replyMsg(list(clientesOnline.keys()),con)
+                    replyMsg(clientes['felipe'],con)
                     print(clientesOnline)
+                    print(type(clientes['felipe']))
                 # elif(msg in clientesOnline and inChat==False):
                 #     replyMsg("voces está num chat",con)
                 #     portaConversa = clientesOnline[msg]
@@ -86,7 +89,7 @@ def clientThread(con,port, clientes):
             print("Cliente {} disse: {}".format(nomeCliente, msg))
 
 
-        clientes[con] = msg #dicionario que mapeia socket - nome
+        clientes[nomeC] = con #dicionario que mapeia socket - nome
         #print(clientes)      
 
         # reply_msg = "Recebi tua mensagem '" + msg +"'"
