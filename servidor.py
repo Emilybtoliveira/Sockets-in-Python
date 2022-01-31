@@ -4,7 +4,23 @@ import sys,os
 
 #MULTI-THREAD
 
-listaUsuarios = ['felipe','emily','taigo']
+
+def isUsuarioCadastrado(nome):
+    nomeArquivo = "usuarios.txt"
+    file = open(nomeArquivo)
+    boolean = nome in file.read()
+    file.close()
+    return boolean # nao fiz aqui um return direto para poder fechar o arquivo
+    
+
+def cadastrarUsuario(nome):
+    nomeArquivo = "usuarios.txt"
+    file = open(nomeArquivo,"a") # vai abrir com append, ou seja, adicionar
+    file.write(nome+"\n") # escreve o nome e da quebra de linha
+    file.close()
+    return True
+
+
 clientes = {}
 clientesOnline = {}
 
@@ -60,16 +76,21 @@ def clientThread(con,port, clientes):
         msg = msg.decode("utf-8")
         
         if(clienteIn==False):
-            if(msg in listaUsuarios):
+            if(isUsuarioCadastrado(msg)):
                 replyMsg("Voce entrou no servidor, bem vindo!",con)
                 print("Cliente %s entrou no servidor" % msg)
                 clienteIn = True
-        
                 usuarioNome = msg
+        
                 clientesOnline[msg] = port
+
+            elif msg == "cadastrar":
+                msg = con.recv(1024)
+                cadastrarUsuario(msg.decode("utf-8"))
                 
+                replyMsg("Voce esta cadastrado, por favor, logue digitando seu usuario",con)
             else:
-                replyMsg("Voce nao esta cadastrado!",con)
+                replyMsg("Voce nao esta cadastrado! Para se cadastrar, digite cadastrar",con)
         else:
             if(inChat):
                 if(msg=='quit'):
