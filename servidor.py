@@ -2,8 +2,13 @@ import socket
 from threading import Thread
 import sys,os
 
-#MULTI-THREAD
-
+def sendForAll(msg, clientesOnline, clientes, sender):   
+    online = list(clientesOnline.keys()) 
+    #print(online)
+    for key in online:
+        if key != sender:
+            #print(key)
+            replyMsg(msg, clientes[key])
 
 def isUsuarioCadastrado(nome):
     nomeArquivo = "usuarios.txt"
@@ -19,11 +24,6 @@ def cadastrarUsuario(nome):
     file.write(nome+"\n") # escreve o nome e da quebra de linha
     file.close()
     return True
-
-
-clientes = {}
-clientesOnline = {}
-
 
 def initServer(clientes):
     host = "localhost"
@@ -67,74 +67,82 @@ def replyMsg(msg,con):
 def clientThread(con,port, clientes):
     clienteIn = False
     inChat = False
-    conversaAtual = ""
     usuarioNome = ""
     
     while True:
-        msg = con.recv(1024)
-        if msg == 'sair': break
+        msg = con.recv(1024)        
         msg = msg.decode("utf-8")
+        #print(msg)
+        if msg == 'sair' or not msg: break
         
-        if(clienteIn==False):
-            if(isUsuarioCadastrado(msg)):
-                replyMsg("Voce entrou no servidor, bem vindo!",con)
-                print("Cliente %s entrou no servidor" % msg)
+        if(clienteIn==False):          
+
+            if msg == "cadastrar":
+                msg = con.recv(1024) #aqui o servidor espera o cliente enviar o nickname do usuario
+                msg = msg.decode("utf-8")
+                #print(msg)
+
+                if(isUsuarioCadastrado(msg)):
+                    replyMsg("Servidor disse: Voce entrou no servidor, bem vindo!",con)
+                    print("Cliente %s entrou no servidor" % msg)                    
+                else:
+                    cadastrarUsuario(msg)                
+                    replyMsg("Servidor disse: Cadastrado!",con)
+                    print("Cliente %s foi cadastrado" % msg)                    
+
                 clienteIn = True
                 usuarioNome = msg
-        
+            
                 clientesOnline[msg] = port
+                clientes[usuarioNome] = con #dicionario que mapeia socket - nome
 
-            elif msg == "cadastrar":
-                msg = con.recv(1024)
-                cadastrarUsuario(msg.decode("utf-8"))
+                msgEnviar = usuarioNome + " se juntou ao servidor!"   
+                sendForAll(msgEnviar, clientesOnline, clientes, usuarioNome) 
                 
-                replyMsg("Voce esta cadastrado, por favor, logue digitando seu usuario",con)
-            else:
-                replyMsg("Voce nao esta cadastrado! Para se cadastrar, digite cadastrar",con)
         else:
             if(inChat):
                 if(msg=='quit'):
                     inChat=False
-                    conversaAtual = ""
-                    replyMsg("Voce saiu do chat",con)
+                    replyMsg("Servidor disse: Voce saiu do chat",con)
                 else:
                 # enviar msg aqui para a porta do receptor
-                    msgEnviar = usuarioNome+": "+msg
-                    replyMsg(msgEnviar,clientes[conversaAtual])
-                    print("conversaAtual: ",conversaAtual)
+                    msgEnviar = usuarioNome+" disse: "+msg
+                    sendForAll(msgEnviar, clientesOnline, clientes, usuarioNome)
+                    print("Broadcasting mensagem de {}: {}".format(usuarioNome, msg))
             else:
                 if(msg=="conversar"):
-                    replyMsg("Escolha com quem conversar:",con)
                     replyMsg(list(clientesOnline.keys()),con)
                     print(clientesOnline)
 
-                if(msg in list(clientesOnline.keys())):
+                if(msg == "chat"):
                     inChat = True
-                    replyMsg("Você está conversando.",con)
-                    conversaAtual = msg
+                    #replyMsg("Servidor disse: você está na conversa.",con)
+                    #print("O cliente {} entrou na conversa".format(usuarioNome))
+                    
+            """ indice = (list(clientesOnline.values())).index(port)
+            nomeCliente = list(clientesOnline.keys())[indice] """            
 
 
-
-            indice = (list(clientesOnline.values())).index(port)
-            nomeCliente = list(clientesOnline.keys())[indice]
-            if(inChat):
-                print("Cliente {} disse: {}".format(nomeCliente, msg))
-
-
-        clientes[usuarioNome] = con #dicionario que mapeia socket - nome
         #print(clientes)      
 
         # reply_msg = "Recebi tua mensagem '" + msg +"'"
         # con.send(bytes(reply_msg, 'iso_8859_1'))
-           
-        
-    print("Cliente", port,"solicitou o fechamento da conexão...")
+    
+         
+    print("Cliente", usuarioNome,"solicitou o fechamento da conexão...")
     con.close()
     print ("Cliente {} deixou o servidor.".format(port))
+    del clientesOnline[usuarioNome]
+
+    msgEnviar = usuarioNome + " deixou o servidor."   
+    sendForAll(msgEnviar, clientesOnline, clientes, usuarioNome)
        
 def getclientes():
     return clientes
 
+
+
+clientes = {}
+clientesOnline = {}
+
 initServer(clientes)
-
-
