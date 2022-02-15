@@ -25,8 +25,14 @@ def sendMessage(msg):
 
 def receiveMessages():
     while True:
-        msg_servidor = tcp.recv(1024)
-        if not msg_servidor: break
+        try:
+            msg_servidor = tcp.recv(1024)
+            if not msg_servidor: break
+        except ConnectionAbortedError:
+            break
+        except ConnectionResetError:
+            print("O servidor solicitou o fechamento da conexão.")
+            break
        
         msgDecodificada = msg_servidor.decode("utf-8")
         print(msgDecodificada)
@@ -34,23 +40,7 @@ def receiveMessages():
         textCons.config(state = 'normal') 
         textCons.insert('end', msgDecodificada+"\n\n") 
         textCons.config(state = 'disabled') 
-        textCons.see('end') 
-
-        """ teste = tk.Label(window, text = msgDecodificada)
-        teste.pack()
- """
-        """ if msgDecodificada[0] == '[':
-            clientesOnline = (eval(msgDecodificada))
-
-            for client in clientesOnline:
-                nome = tk.Label(master = frame2 ,text=client)
-                nome.pack()  """           
-
-        """ if "socket" in msgDecodificada[0:10]:
-            classe = eval(msgDecodificada)
-            print(type(classe)) """
-        # fazer aqui para ele retornar o socket 
-        
+        textCons.see('end')        
     tcp.close()
     
 def chatting():
@@ -102,7 +92,7 @@ def getUsername():
         sendMessage(username.get())
         onlineClients(frame1, username.get())
         
-
+    
 #INIT SERVER
 # mudar a porta, mudar o tcp para o novo socket que vem do servidor
 HOST = 'localhost'     # Endereco IP do Servidor
@@ -110,43 +100,46 @@ PORT = 5000            # Porta que o Servidor esta
 
 tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 dest = (HOST, PORT)
+on = False
+
 try:
     tcp.connect(dest)
+    on = True    
+    Thread(target=receiveMessages, args=()).start()
 except ConnectionRefusedError:
     print("servidor off")
 
-Thread(target=receiveMessages, args=()).start()
+if(on):
+    #GUI
+    window = tk.Tk()
+    window.geometry('500x550')
 
-#GUI
-window = tk.Tk()
-window.geometry('500x550')
+    frame1 = tk.Frame()
+    frame2 = tk.Frame()
+    frame3 = tk.Frame()
 
-frame1 = tk.Frame()
-frame2 = tk.Frame()
-frame3 = tk.Frame()
+    username = tk.StringVar()
+    message = tk.StringVar()
 
-username = tk.StringVar()
-message = tk.StringVar()
+    type_name = tk.Label(master = frame1, text="Digite o nome do seu usuário:")
+    entry = tk.Entry(master = frame1, textvariable=username)
+    resultButton = tk.Button(master = frame1, text = 'Entrar', command=getUsername)
 
-type_name = tk.Label(master = frame1, text="Digite o nome do seu usuário:")
-entry = tk.Entry(master = frame1, textvariable=username)
-resultButton = tk.Button(master = frame1, text = 'Entrar', command=getUsername)
-
-labelHead = tk.Label(window, text = "Chat com todos",font = "Helvetica 13", pady = 12) 
-buttonQuit = tk.Button(labelHead, text="Sair do programa", font = "Helvetica 11", pady = 12, command=closeConnection)   
-textCons = tk.Text(window, width = 20, height = 2, font = "Helvetica 14", padx = 5, pady = 5) 
-labelBottom = tk.Label(window, height = 50) 
-entryMsg = tk.Entry(labelBottom, textvariable=message,  font = "Helvetica 13") 
-buttonMsg = tk.Button(labelBottom, text = "Enviar", font = "Helvetica 11", width = 20, command=lambda: sendMessage(message.get()))
-scrollbar = tk.Scrollbar(textCons) 
+    labelHead = tk.Label(window, text = "Chat com todos",font = "Helvetica 13", pady = 12) 
+    buttonQuit = tk.Button(labelHead, text="Sair do programa", font = "Helvetica 11", pady = 12, command=closeConnection)   
+    textCons = tk.Text(window, width = 20, height = 2, font = "Helvetica 14", padx = 5, pady = 5) 
+    labelBottom = tk.Label(window, height = 50) 
+    entryMsg = tk.Entry(labelBottom, textvariable=message,  font = "Helvetica 13") 
+    buttonMsg = tk.Button(labelBottom, text = "Enviar", font = "Helvetica 11", width = 20, command=lambda: sendMessage(message.get()))
+    scrollbar = tk.Scrollbar(textCons) 
 
 
-type_name.pack()
-entry.pack()
-resultButton.pack()
-frame1.pack(anchor=tk.CENTER, expand=1)
-frame2.pack(anchor=tk.CENTER, expand=1)
-frame3.pack(anchor=tk.CENTER, expand=1)
+    type_name.pack()
+    entry.pack()
+    resultButton.pack()
+    frame1.pack(anchor=tk.CENTER, expand=1)
+    frame2.pack(anchor=tk.CENTER, expand=1)
+    frame3.pack(anchor=tk.CENTER, expand=1)
 
-window.title("Discord da DeepWeb")
-window.mainloop()
+    window.title("Discord da DeepWeb")
+    window.mainloop()

@@ -38,9 +38,8 @@ def initServer(clientes):
     tcp.listen()
     print("Socket está à escuta na porta 5000...")
     print("Digite 'quit' para finalizar a execução do servidor a qualquer momento.\n")
-    Thread(target=serverThread, args=()).start() 
+    Thread(target=serverThread, args=(tcp,)).start() 
 
-    #infinite loop - do not reset for every requests
     while True:
         con, cliente = tcp.accept()
         #print(con.getpeername()) #pegar as informações do cliente        
@@ -51,11 +50,12 @@ def initServer(clientes):
     tcp.close()  
 
 
-def serverThread():
+def serverThread(tcp):
     while True:
         awaits = input()
         if awaits == 'quit':
             print("Finalizando execução do servidor...")
+            tcp.close()
             os._exit(0) #ver se funciona no windows
             #ou sys.exit()      
 
@@ -139,7 +139,6 @@ def clientThread(con,port, clientes):
        
 def getclientes():
     return clientes
-
 
 
 clientes = {}
