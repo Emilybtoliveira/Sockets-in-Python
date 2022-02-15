@@ -3,7 +3,7 @@
 <p align="center">Implementação de socket utilizando a linguagem Python para a disciplina de Redes 1</p>
 
 Alunos:
-Emily Brito de Oliveira
+Emily Brito de Oliveira<br>
 Felipe Ferreira Vasconcelos
 
 <h3>Como rodar?</h3>
