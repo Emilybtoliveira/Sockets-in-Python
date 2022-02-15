@@ -9,7 +9,9 @@ Felipe Ferreira Vasconcelos
 <h3>Como rodar?</h3>
 
 <p> Itens necessários: </p>
+
   * Python
+
  
  Após baixar o código source, deve-se inicializar primeiramente o arquivo "servidor.py", por meio  tanto de "python servidor.py" ou "python3 servidor.py" no terminal do computador, como um clique duplo com o mouse.
  É necessário manter este terminal sendo único, além de estar ativo e rodando o arquivo, para que o servidor que irá lidar com o socket TCP possa estar online.
