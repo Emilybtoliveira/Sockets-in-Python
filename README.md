@@ -1,7 +1,7 @@
 <h1 align="center"> Projeto-Redes1</h1>
 <p align="center">Implementação de socket utilizando a linguagem Python para a disciplina de Redes de Computadores1</p>
 
-**Alunos:** [Emily Brito de Oliveira](github.com/Emilybtoliveira) e [Felipe Ferreira Vasconcelos](github.com/felipeVsc)
+**Alunos:** [Emily Brito de Oliveira](https://github.com/Emilybtoliveira) e [Felipe Ferreira Vasconcelos](https://github.com/felipeVsc)
 
 <h3> Pré-requisitos: </h3>
 
@@ -14,7 +14,7 @@ Após baixar o código source, navegue via terminal/cmd até a pasta *src* `/Pro
 ```bash
 python servidor.py
 ```
-
+ou
 ```bash
 python3 servidor.py
 ```
@@ -26,7 +26,7 @@ python3 servidor.py
 ```bash
 python cliente.py
 ```
-
+ou
 ```bash
 python3 cliente.py
 ```
